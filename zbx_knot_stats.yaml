@@ -1,0 +1,1112 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: fd4a65755652473987656d02b16b58a4
+      name: Шаблоны
+  templates:
+    - uuid: 11ba6a21f39f4409988b875e9216ceea
+      template: 'Template App KnotDNS active'
+      name: 'Template App KnotDNS active'
+      groups:
+        - name: Шаблоны
+      items:
+        - uuid: dba64a29767641b78e62267df950f835
+          name: 'Knot status'
+          type: ZABBIX_ACTIVE
+          key: knotstat.status
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          tags:
+            - tag: Application
+              value: KnotDNS
+          triggers:
+            - uuid: ce533ddedc224754923ed1f09cc61dc0
+              expression: 'last(/Template App KnotDNS active/knotstat.status)<>"running"'
+              name: 'Knot status in not ''running'''
+              priority: DISASTER
+        - uuid: fe91640c1a6c46cc935f36e82a2a8bb7
+          name: 'Knot zones'
+          type: ZABBIX_ACTIVE
+          key: knotstat.zones
+          delay: 5m
+          history: '0'
+          value_type: TEXT
+          trends: '0'
+          tags:
+            - tag: Application
+              value: KnotDNS
+      discovery_rules:
+        - uuid: cf867ce603c04c48b599024817bc52a9
+          name: 'Knot zones discovery'
+          type: DEPENDENT
+          key: knotstat.discover.zones
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#ZONE}'
+                value: '{$KNOT.ZONE.EXCLUDES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: A
+          lifetime: 90d
+          item_prototypes:
+            - uuid: b8b055790f9f4be585eb045784db07e6
+              name: 'Knot zone ''{#ZONE}'' max ttl'
+              type: DEPENDENT
+              key: 'knotstat.zone.max-ttl[{#ZONE}]'
+              delay: '0'
+              history: 90d
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["zone-max-ttl"]'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 12d18332a2054df29ce228bc248db598
+              name: 'Knot zone ''{#ZONE}'' operations ''axfr'''
+              type: DEPENDENT
+              key: 'knotstat.zone.ops[{#ZONE},axfr]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: ops
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["server-operation"]["axfr"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 72b8595e75ec4bc6bf766f34e3150bbf
+              name: 'Knot zone ''{#ZONE}'' operations ''invalid'''
+              type: DEPENDENT
+              key: 'knotstat.zone.ops[{#ZONE},invalid]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: ops
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["server-operation"]["invalid"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 6955445129ed4430af90672ce638abb9
+              name: 'Knot zone ''{#ZONE}'' operations ''ixfr'''
+              type: DEPENDENT
+              key: 'knotstat.zone.ops[{#ZONE},ixfr]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: ops
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["server-operation"]["ixfr"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 29b8b84632ec4924b1ca0b9a97de2fe8
+              name: 'Knot zone ''{#ZONE}'' operations ''notify'''
+              type: DEPENDENT
+              key: 'knotstat.zone.ops[{#ZONE},notify]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: ops
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["server-operation"]["notify"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: a70b9bc44f1c415da3f65add47e24c1d
+              name: 'Knot zone ''{#ZONE}'' operations ''query'''
+              type: DEPENDENT
+              key: 'knotstat.zone.ops[{#ZONE},query]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: ops
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["server-operation"]["query"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 7e13a94ec9ac4c5e8f5bce6655b27f9c
+              name: 'Knot zone ''{#ZONE}'' operations ''update'''
+              type: DEPENDENT
+              key: 'knotstat.zone.ops[{#ZONE},update]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: ops
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["server-operation"]["update"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: c28373f01b144fec8fdcbfa6c089b771
+              name: 'Knot zone ''{#ZONE}'' queries ''AAAA'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},AAAA]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["AAAA"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 8d7b20558d0d4545b236a6d7f72378c3
+              name: 'Knot zone ''{#ZONE}'' queries ''ANY'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},ANY]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["ANY"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 76738fcf6e584801bfe1450b71afcf0d
+              name: 'Knot zone ''{#ZONE}'' queries ''A'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},A]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["A"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 8a052c8c90d540048ebec0ba6b83924a
+              name: 'Knot zone ''{#ZONE}'' queries ''CNAME'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},CNAME]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["CNAME"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: c9e51247a6d042b1ad7d111b578fc702
+              name: 'Knot zone ''{#ZONE}'' queries ''DNSKEY'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},DNSKEY]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["DNSKEY"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: d4ef6808c13e4626a475501ea40ab0e2
+              name: 'Knot zone ''{#ZONE}'' queries ''HTTPS'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},HTTPS]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["HTTPS"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: ea58ad6ca1074a7db2f988234a18ed67
+              name: 'Knot zone ''{#ZONE}'' queries ''MX'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},MX]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["MX"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 64e7e8808316466f85ca265bca7c5da7
+              name: 'Knot zone ''{#ZONE}'' queries ''NS'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},NS]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["NS"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 4d29d6d8d6134c3e951769ad8c0e825b
+              name: 'Knot zone ''{#ZONE}'' queries ''PTR'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},PTR]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["PTR"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: c37f8d0eacc841d6b6897f705bcc2147
+              name: 'Knot zone ''{#ZONE}'' queries ''SOA'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},SOA]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["SOA"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: e7ce2181b15443809de74529831c99be
+              name: 'Knot zone ''{#ZONE}'' queries ''SRV'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},SRV]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["SRV"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 5d0e3eb5cc15483d8d97593063985cf5
+              name: 'Knot zone ''{#ZONE}'' queries ''TXT'''
+              type: DEPENDENT
+              key: 'knotstat.zone.queries[{#ZONE},TXT]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["query-type"]["TXT"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 745d9383d5cd41298a748d86650de5da
+              name: 'Knot zone ''{#ZONE}'' request-protocol ''quic4'''
+              type: DEPENDENT
+              key: 'knotstat.zone.req-proto[{#ZONE},quic4]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["request-protocol"]["quic4"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 93d28262f47d4d6599a8a059a8f12dd5
+              name: 'Knot zone ''{#ZONE}'' request-protocol ''quic6'''
+              type: DEPENDENT
+              key: 'knotstat.zone.req-proto[{#ZONE},quic6]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["request-protocol"]["quic6"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 150d694e00f84fb79a4376f324fa6caf
+              name: 'Knot zone ''{#ZONE}'' request-protocol ''tcp4'''
+              type: DEPENDENT
+              key: 'knotstat.zone.req-proto[{#ZONE},tcp4]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["request-protocol"]["tcp4"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 10047441bb9d476d929fd8ab40047686
+              name: 'Knot zone ''{#ZONE}'' request-protocol ''tcp6'''
+              type: DEPENDENT
+              key: 'knotstat.zone.req-proto[{#ZONE},tcp6]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["request-protocol"]["tcp6"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: b87c8e0865de48c2a7184eab932621f4
+              name: 'Knot zone ''{#ZONE}'' request-protocol ''udp4'''
+              type: DEPENDENT
+              key: 'knotstat.zone.req-proto[{#ZONE},udp4]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["request-protocol"]["udp4"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: f000f8cfbf164b3e9b305212c78491f8
+              name: 'Knot zone ''{#ZONE}'' request-protocol ''udp6'''
+              type: DEPENDENT
+              key: 'knotstat.zone.req-proto[{#ZONE},udp6]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["request-protocol"]["udp6"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 459ad6fa3b694340af3fa41763f354bf
+              name: 'Knot zone ''{#ZONE}'' response-code ''FORMERR'''
+              type: DEPENDENT
+              key: 'knotstat.zone.resp-codes[{#ZONE},FORMERR]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["response-code"]["FORMERR"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 0c2b46d6e3c442f38e8ed57717e43e70
+              name: 'Knot zone ''{#ZONE}'' response-code ''NOERROR'''
+              type: DEPENDENT
+              key: 'knotstat.zone.resp-codes[{#ZONE},NOERROR]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["response-code"]["NOERROR"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: f7d54d0677164808b8d0acae728cfcb0
+              name: 'Knot zone ''{#ZONE}'' response-code ''NOTAUTH'''
+              type: DEPENDENT
+              key: 'knotstat.zone.resp-codes[{#ZONE},NOTAUTH]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["response-code"]["NOTAUTH"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 2f80cdfc800640f6b632adcf5ba1f4d1
+              name: 'Knot zone ''{#ZONE}'' response-code ''NOTZONE'''
+              type: DEPENDENT
+              key: 'knotstat.zone.resp-codes[{#ZONE},NOTZONE]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["response-code"]["NOTZONE"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: a7397a76eb9e4f35bf9685dc88715604
+              name: 'Knot zone ''{#ZONE}'' response-code ''NXDOMAIN'''
+              type: DEPENDENT
+              key: 'knotstat.zone.resp-codes[{#ZONE},NXDOMAIN]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["response-code"]["NXDOMAIN"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: af30a8861d7048d2ba94ba7834ceabfb
+              name: 'Knot zone ''{#ZONE}'' response-code ''REFUSED'''
+              type: DEPENDENT
+              key: 'knotstat.zone.resp-codes[{#ZONE},REFUSED]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["response-code"]["REFUSED"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: d07656e803f8410c84d5c30fdef5fea5
+              name: 'Knot zone ''{#ZONE}'' response-code ''SERVFAIL'''
+              type: DEPENDENT
+              key: 'knotstat.zone.resp-codes[{#ZONE},SERVFAIL]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              trends: 730d
+              units: rps
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["response-code"]["SERVFAIL"]'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: a61c3d3ab5cb46f2a62ef12fbabc0b4a
+              name: 'Knot zone ''{#ZONE}'' role'
+              type: DEPENDENT
+              key: 'knotstat.zone.role[{#ZONE}]'
+              delay: '0'
+              history: 90d
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.role
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+              trigger_prototypes:
+                - uuid: 6d373a0d1bbc48b0ab4a48e45f7d118b
+                  expression: 'change(/Template App KnotDNS active/knotstat.zone.role[{#ZONE}])<>0'
+                  name: 'Knot zone ''{#ZONE}'' role changed'
+                  opdata: 'Role now: {ITEM.VALUE1}'
+                  priority: INFO
+            - uuid: fcdc52a76778412d99ae2bb265ac522e
+              name: 'Knot zone ''{#ZONE}'' serial'
+              type: DEPENDENT
+              key: 'knotstat.zone.serial[{#ZONE}]'
+              delay: '0'
+              history: 90d
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.serial
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+              trigger_prototypes:
+                - uuid: 3877e5f8389946dd864278867c2af642
+                  expression: 'change(/Template App KnotDNS active/knotstat.zone.serial[{#ZONE}])<>0'
+                  name: 'Knot zone ''{#ZONE}'' serial changed'
+                  opdata: 'Serial now: {ITEM.VALUE1}'
+                  priority: INFO
+            - uuid: b5bfd4faa78542af85888b61fe4277c5
+              name: 'Knot zone ''{#ZONE}'' size'
+              type: DEPENDENT
+              key: 'knotstat.zone.size[{#ZONE}]'
+              delay: '0'
+              history: 90d
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.["zone-size"]'
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 60292a019bf040538c6534fb6c0e505a
+              name: 'Knot zone ''{#ZONE}'' soa params'
+              type: DEPENDENT
+              key: 'knotstat.zone.soa-params[{#ZONE}]'
+              delay: '0'
+              history: 90d
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - $.soa
+                - type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'knotstat.zone[{#ZONE}]'
+              tags:
+                - tag: Application
+                  value: KnotDNS
+            - uuid: 5bfb97a8ec11432db27013bf2268d794
+              name: 'Knot zone ''{#ZONE}'' stats'
+              type: ZABBIX_ACTIVE
+              key: 'knotstat.zone[{#ZONE}]'
+              history: '0'
+              value_type: TEXT
+              trends: '0'
+          graph_prototypes:
+            - uuid: 6619fe7a07b34b42b72e8f9d78e60595
+              name: 'Knot zone ''{#ZONE}'' operations'
+              type: STACKED
+              ymin_type_1: FIXED
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.ops[{#ZONE},axfr]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.ops[{#ZONE},invalid]'
+                - sortorder: '2'
+                  color: F63100
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.ops[{#ZONE},ixfr]'
+                - sortorder: '3'
+                  color: 2774A4
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.ops[{#ZONE},notify]'
+                - sortorder: '4'
+                  color: A54F10
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.ops[{#ZONE},query]'
+                - sortorder: '5'
+                  color: FC6EA3
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.ops[{#ZONE},update]'
+            - uuid: 78bcc63f5b414e2492dbf7bd42d13803
+              name: 'Knot zone ''{#ZONE}'' queries'
+              type: STACKED
+              ymin_type_1: FIXED
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},A]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},AAAA]'
+                - sortorder: '2'
+                  color: F63100
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},ANY]'
+                - sortorder: '3'
+                  color: 2774A4
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},CNAME]'
+                - sortorder: '4'
+                  color: A54F10
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},DNSKEY]'
+                - sortorder: '5'
+                  color: FC6EA3
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},HTTPS]'
+                - sortorder: '6'
+                  color: 6C59DC
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},MX]'
+                - sortorder: '7'
+                  color: AC8C14
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},NS]'
+                - sortorder: '8'
+                  color: 611F27
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},PTR]'
+                - sortorder: '9'
+                  color: F230E0
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},SOA]'
+                - sortorder: '10'
+                  color: 5CCD18
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},SRV]'
+                - sortorder: '11'
+                  color: BB2A02
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.queries[{#ZONE},TXT]'
+            - uuid: fa8dbb86b55b47a88cdbfdb52712def8
+              name: 'Knot zone ''{#ZONE}'' request-protocols'
+              type: STACKED
+              ymin_type_1: FIXED
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.req-proto[{#ZONE},quic4]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.req-proto[{#ZONE},quic6]'
+                - sortorder: '2'
+                  color: F63100
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.req-proto[{#ZONE},tcp4]'
+                - sortorder: '3'
+                  color: 2774A4
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.req-proto[{#ZONE},tcp6]'
+                - sortorder: '4'
+                  color: A54F10
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.req-proto[{#ZONE},udp4]'
+                - sortorder: '5'
+                  color: FC6EA3
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.req-proto[{#ZONE},udp6]'
+            - uuid: 7a68d8a3a4c24d3cadab986e81cf2c8b
+              name: 'Knot zone ''{#ZONE}'' response-codes'
+              type: STACKED
+              ymin_type_1: FIXED
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.resp-codes[{#ZONE},FORMERR]'
+                - sortorder: '1'
+                  color: '274482'
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.resp-codes[{#ZONE},NOERROR]'
+                - sortorder: '2'
+                  color: F63100
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.resp-codes[{#ZONE},NOTAUTH]'
+                - sortorder: '3'
+                  color: 2774A4
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.resp-codes[{#ZONE},NOTZONE]'
+                - sortorder: '4'
+                  color: A54F10
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.resp-codes[{#ZONE},NXDOMAIN]'
+                - sortorder: '5'
+                  color: FC6EA3
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.resp-codes[{#ZONE},REFUSED]'
+                - sortorder: '6'
+                  color: 6C59DC
+                  calc_fnc: MIN
+                  item:
+                    host: 'Template App KnotDNS active'
+                    key: 'knotstat.zone.resp-codes[{#ZONE},SERVFAIL]'
+          master_item:
+            key: knotstat.zones
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  var output = []
+                  
+                  var zones = JSON.parse(value)
+                  Object.keys(zones).forEach(function(zone) {
+                    output.push({
+                      "{#ZONE}": zone,
+                    })
+                  });
+                  
+                  return JSON.stringify(output)
+      tags:
+        - tag: Application
+          value: KnotDNS
+      macros:
+        - macro: '{$KNOT.ZONE.EXCLUDES}'
+          value: ^(example.com)$
+          description: 'Exclude dns zones'
